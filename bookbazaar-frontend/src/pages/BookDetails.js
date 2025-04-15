@@ -282,3 +282,16 @@ const BookDetails = () => {
                   <small className="text-muted">
                     Posted on {new Date(review.createdAt).toLocaleDateString()}
                   </small>
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="text-muted">No reviews yet.</p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default BookDetails;
