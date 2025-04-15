@@ -1,11 +1,11 @@
-package com.bookbazaar;
+package com.bookmarket;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class BookBazaarBackendApplication {
+public class BookMarketplaceApplication {
     public static void main(String[] args) {
-        SpringApplication.run(BookBazaarBackendApplication.class, args);
+        SpringApplication.run(BookMarketplaceApplication.class, args);
     }
 }
