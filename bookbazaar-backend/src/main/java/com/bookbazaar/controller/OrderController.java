@@ -27,11 +27,14 @@ public class OrderController {
         User user = (User) request.getAttribute("user");
         List<CartItem> cartItems = cartRepository.findByUserId(user.getId());
 
-        double total = 0.0;
-        List<String> bookIds = cartItems.stream().map(item -> {
-            total += item.getQuantity() * item.getQuantity(); // simulate price logic (can be fetched with real book details)
-            return item.getBookId();
-        }).collect(Collectors.toList());
+        List<String> bookIds = cartItems.stream()
+    .map(CartItem::getBookId)
+    .collect(Collectors.toList());
+
+double total = cartItems.stream()
+    .mapToDouble(item -> item.getQuantity() * item.getQuantity())
+    .sum();
+
 
         if (user.getWalletBalance() < total) throw new RuntimeException("Insufficient wallet balance");
 

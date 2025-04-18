@@ -1,129 +1,117 @@
-import React, { createContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useContext } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import AuthContext from '../../context/AuthContext';
 
-const AuthContext = createContext();
-
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  // Load user on initial render
-  useEffect(() => {
-    const loadUser = async () => {
-      const token = localStorage.getItem('token');
-      
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-      
-      try {
-        axios.defaults.headers.common['x-auth-token'] = token;
-        const res = await axios.get('/api/auth');
-        
-        setUser(res.data);
-        setIsAuthenticated(true);
-      } catch (err) {
-        localStorage.removeItem('token');
-        setError(err.response?.data?.msg || 'Authentication failed');
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    loadUser();
-  }, []);
-
-  // Login user
-  const login = async (email, password) => {
-    try {
-      const res = await axios.post('/api/auth/login', { email, password });
-      
-      localStorage.setItem('token', res.data.token);
-      axios.defaults.headers.common['x-auth-token'] = res.data.token;
-      
-      setUser(res.data.user);
-      setIsAuthenticated(true);
-      setError(null);
-      
-      return res.data.user;
-    } catch (err) {
-      setError(err.response?.data?.msg || 'Login failed');
-      throw err;
-    }
+const Header = () => {
+  const { isAuthenticated, user, logout } = useContext(AuthContext);
+  const navigate = useNavigate();
+  
+  const handleLogout = () => {
+    logout();
+    navigate('/');
   };
-
-  // Register user
-  const register = async (userData) => {
-    try {
-      const res = await axios.post('/api/users', userData);
-      
-      localStorage.setItem('token', res.data.token);
-      axios.defaults.headers.common['x-auth-token'] = res.data.token;
-      
-      setUser(res.data.user);
-      setIsAuthenticated(true);
-      setError(null);
-      
-      return res.data.user;
-    } catch (err) {
-      setError(err.response?.data?.msg || 'Registration failed');
-      throw err;
-    }
-  };
-
-  // Logout user
-  const logout = () => {
-    localStorage.removeItem('token');
-    delete axios.defaults.headers.common['x-auth-token'];
-    
-    setUser(null);
-    setIsAuthenticated(false);
-  };
-
-  // Apply to become a seller
-  const applyAsSeller = async () => {
-    try {
-      const res = await axios.post('/api/users/apply-seller');
-      setUser(res.data);
-      return res.data;
-    } catch (err) {
-      setError(err.response?.data?.msg || 'Application failed');
-      throw err;
-    }
-  };
-
-  // Update user profile
-  const updateProfile = async (userData) => {
-    try {
-      const res = await axios.put('/api/users/profile', userData);
-      setUser(res.data);
-      return res.data;
-    } catch (err) {
-      setError(err.response?.data?.msg || 'Update failed');
-      throw err;
-    }
-  };
+  
+  const authLinks = (
+    <ul className="navbar-nav ml-auto">
+      <li className="nav-item">
+        <Link className="nav-link" to="/cart">
+          <i className="fas fa-shopping-cart"></i> Cart
+        </Link>
+      </li>
+      <li className="nav-item dropdown">
+        <a
+          className="nav-link dropdown-toggle"
+          href="#!"
+          id="navbarDropdown"
+          role="button"
+          data-toggle="dropdown"
+          aria-haspopup="true"
+          aria-expanded="false"
+        >
+          {user && user.name}
+        </a>
+        <div className="dropdown-menu" aria-labelledby="navbarDropdown">
+          <Link className="dropdown-item" to="/dashboard">
+            Dashboard
+          </Link>
+          <Link className="dropdown-item" to="/profile">
+            Profile
+          </Link>
+          <Link className="dropdown-item" to="/orders">
+            My Orders
+          </Link>
+          {user && user.role === 'seller' && (
+            <Link className="dropdown-item" to="/seller/dashboard">
+              Seller Dashboard
+            </Link>
+          )}
+          <div className="dropdown-divider"></div>
+          <a onClick={handleLogout} className="dropdown-item" href="#!">
+            Logout
+          </a>
+        </div>
+      </li>
+    </ul>
+  );
+  
+  const guestLinks = (
+    <ul className="navbar-nav ml-auto">
+      <li className="nav-item">
+        <Link className="nav-link" to="/register">
+          Register
+        </Link>
+      </li>
+      <li className="nav-item">
+        <Link className="nav-link" to="/login">
+          Login
+        </Link>
+      </li>
+    </ul>
+  );
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        isAuthenticated,
-        loading,
-        error,
-        login,
-        register,
-        logout,
-        applyAsSeller,
-        updateProfile
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
+    <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
+      <div className="container">
+        <Link className="navbar-brand" to="/">
+          BookMarket
+        </Link>
+        <button
+          className="navbar-toggler"
+          type="button"
+          data-toggle="collapse"
+          data-target="#navbarMain"
+        >
+          <span className="navbar-toggler-icon"></span>
+        </button>
+        <div className="collapse navbar-collapse" id="navbarMain">
+          <ul className="navbar-nav mr-auto">
+            <li className="nav-item">
+              <Link className="nav-link" to="/">
+                Home
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link" to="/books">
+                Browse Books
+              </Link>
+            </li>
+          </ul>
+          <form className="form-inline my-2 my-lg-0 mx-auto">
+            <input
+              className="form-control mr-sm-2"
+              type="search"
+              placeholder="Search books..."
+              aria-label="Search"
+            />
+            <button className="btn btn-outline-light my-2 my-sm-0" type="submit">
+              Search
+            </button>
+          </form>
+          {isAuthenticated ? authLinks : guestLinks}
+        </div>
+      </div>
+    </nav>
   );
 };
 
-export default AuthContext;
+export default Header;

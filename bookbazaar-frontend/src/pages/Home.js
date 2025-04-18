@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from "axios"
 import BookItem from '../components/books/BookItem';
 import BookFilter from '../components/books/BookFilter';
 
@@ -8,7 +8,7 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({});
   const [featuredBooks, setFeaturedBooks] = useState([]);
-
+  
   useEffect(() => {
     const fetchBooks = async () => {
       try {
